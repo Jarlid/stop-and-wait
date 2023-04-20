@@ -35,6 +35,8 @@ def try_sendto(self, thing, address, index, num, num_all):
 
         except socket.timeout:
             pass
+        except ConnectionResetError:
+            break
 
 
 def send(self, data, address):
@@ -50,12 +52,12 @@ def try_recvfrom(self, index, num):
     while True:
         got, address = self.recvfrom(BATCH_SIZE + 1)
         got_index, got_data = unpack(got)
-        print(got_index, index)
         if got_index != index:
             troubled_sendto(self, pack(ACK_STRING.encode('ascii'), index), address)
             continue
 
-        print(f'Got package #{num}.')
+        if got_data != b'\x00':
+            print(f'Got package #{num}.')
         troubled_sendto(self, pack(ACK_STRING.encode('ascii'), (index + 1) % 2), address)
         return got_data
 
