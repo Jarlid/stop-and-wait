@@ -1,7 +1,7 @@
 from random import randint
 import socket
 
-from config import LOST_PERCENTAGE, BATCH_SIZE, ACK_STRING, ACK_SIZE
+from config import LOST_PERCENTAGE, BATCH_SIZE, HI_STRING, ACK_STRING
 
 
 def data_split(data: bytes):
@@ -26,7 +26,7 @@ def try_sendto(self, thing, address, index, num, num_all):
         try:
             troubled_sendto(self, pack(thing, index), address)
 
-            ack, _ = self.recvfrom(ACK_SIZE + 1)
+            ack, _ = self.recvfrom(len(ACK_STRING) + 1)
             ack_index, ack_data = unpack(ack)
             if ack_index != (index + 1) % 2 or ack_data.decode('ascii') != ACK_STRING:
                 continue
@@ -74,3 +74,22 @@ def recv(self):
         num += 1
 
     return to_ret.decode('ascii')
+
+
+def say_hi(self, address):
+    while True:
+        try:
+            troubled_sendto(self, HI_STRING.encode('ascii'), address)
+            self.recvfrom(BATCH_SIZE + 1)
+            print('Successfully said "Hi!"')
+            break
+
+        except socket.timeout:
+            pass
+
+
+def get_hi(self):
+    while True:
+        hi, address = self.recvfrom(len(HI_STRING))
+        print('Address found!')
+        return address

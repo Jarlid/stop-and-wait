@@ -1,7 +1,7 @@
 import socket
 
 from config import *
-from engine import recv, send
+from engine import recv, send, get_hi
 
 print('Starting server.', end='')
 server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -16,4 +16,7 @@ if SENDER == Sender.CLIENT:
     with open(OUT_FILE, 'w') as file:
         file.write(received)
 else:
-    pass
+    address = get_hi(server)
+    server.settimeout(TIMEOUT)
+    with open(IN_FILE, 'r') as file:
+        send(server, file.read(), address)
